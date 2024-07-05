@@ -1,23 +1,20 @@
-import {
-  Controller,
-  Post,
-  Body,
-} from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { User } from 'src/user/entities/user.entity';
+import { CreateAuthDto, CreateUserResponse } from './dto/create-auth.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // @HttpCode(201)
   @Post('register')
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
+  create(@Body() createUserDto: CreateUserDto): Promise<CreateUserResponse> {
     return this.authService.register(createUserDto);
   }
 
-  @Post()
+  // @HttpCode(200)
+  @Post('login')
   login(@Body() createAuthDto: CreateAuthDto) {
     return this.authService.login(createAuthDto);
   }
