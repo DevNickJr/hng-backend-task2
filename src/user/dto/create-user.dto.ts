@@ -1,4 +1,4 @@
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 import { IUser } from '../interface';
 import { GenericResponse } from 'src/auth/dto/create-auth.dto';
 
@@ -16,6 +16,7 @@ export class CreateUserDto implements IUser {
   password: string;
 
   @IsString()
+  @IsOptional()
   phone: string;
 }
 
@@ -33,7 +34,8 @@ export class ReturnUserDto implements Omit<IUser, 'password'> {
   email: string;
 
   @IsString()
-  phone: string;
+  @IsOptional()
+  phone?: string;
 }
 
 export class GetUserResponse extends GenericResponse {

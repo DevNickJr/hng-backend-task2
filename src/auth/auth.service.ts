@@ -9,6 +9,8 @@ import { UserOrganisationService } from 'src/shared/shared.service';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 import { jwtConstants } from './constants';
+import { instanceToPlain } from 'class-transformer';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -42,12 +44,14 @@ export class AuthService {
 
       const token = this.createToken(payload);
 
+      const returnUser = instanceToPlain(newUser) as User;
+
       return {
         status: 'success',
         message: 'Registration successful',
         data: {
           accessToken: token,
-          user: newUser,
+          user: returnUser,
         },
       };
     } catch (error) {

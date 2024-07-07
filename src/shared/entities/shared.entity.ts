@@ -21,7 +21,7 @@ export class UserOrganisation implements IUserOrganisation {
   @PrimaryColumn()
   userId: string;
 
-  @Column()
+  @Column({ nullable: true })
   isOwner?: boolean;
 
   @ManyToOne(() => User, (user) => user.userOrganisations)

@@ -10,7 +10,7 @@ export class Organisation implements IOrganisation {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   description?: string;
 
   @OneToMany(

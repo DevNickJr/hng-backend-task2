@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { IUser } from '../interface';
 import { UserOrganisation } from 'src/shared/entities/shared.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User implements IUser {
@@ -25,11 +26,12 @@ export class User implements IUser {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ select: false })
+  @Exclude()
   password: string;
 
-  @Column()
-  phone: string;
+  @Column({ nullable: true })
+  phone?: string;
 
   @OneToMany(
     () => UserOrganisation,
