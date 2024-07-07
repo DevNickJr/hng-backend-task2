@@ -1,5 +1,6 @@
 export interface IOrganisation {
-  orgId: string;
+  id?: number;
+  orgId?: string;
   name: string;
-  description: string;
+  description?: string;
 }

@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OrganisationService } from './organisation.service';
 import { Repository } from 'typeorm';
-import { Organisation } from './entities/organisation.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { UserOrganisationService } from './shared.service';
+import { UserOrganisation } from './entities/shared.entity';
 
-describe('OrganisationService', () => {
-  let service: OrganisationService;
-  let repositoryMock: Partial<Repository<Organisation>>;
+describe('UserOrganisationService', () => {
+  let service: UserOrganisationService;
+  let repositoryMock: Partial<Repository<UserOrganisation>>;
 
   beforeEach(async () => {
     repositoryMock = {
@@ -19,15 +19,15 @@ describe('OrganisationService', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        OrganisationService,
+        UserOrganisationService,
         {
-          provide: getRepositoryToken(Organisation),
+          provide: getRepositoryToken(UserOrganisation),
           useValue: repositoryMock,
         },
       ],
     }).compile();
 
-    service = module.get<OrganisationService>(OrganisationService);
+    service = module.get<UserOrganisationService>(UserOrganisationService);
   });
 
   it('should be defined', () => {
