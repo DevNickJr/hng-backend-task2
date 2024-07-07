@@ -59,13 +59,16 @@ export class AuthService {
       throw new BadRequestException({
         status: 'Bad request',
         message: 'Registration unsuccessful',
+        statusCode: 400,
       });
     }
   }
 
   async login(createAuthDto: CreateAuthDto): Promise<CreateUserResponse> {
     try {
-      const user = await this.usersService.getUserByEmail(createAuthDto.email);
+      const user = await this.usersService.getUserByEmailWithPassword(
+        createAuthDto.email,
+      );
 
       if (!user) {
         throw new BadRequestException('User does not exist');
@@ -77,18 +80,22 @@ export class AuthService {
 
       const token = this.createToken(payload);
 
+      const returnUser = instanceToPlain(user) as User;
+
       return {
         status: 'success',
         message: 'Login successful',
         data: {
           accessToken: token,
-          user: user,
+          user: returnUser,
         },
       };
     } catch (error) {
+      console.log({ error });
       throw new UnauthorizedException({
         status: 'Bad request',
         message: 'Authentication failed',
+        statusCode: 401,
       });
     }
   }

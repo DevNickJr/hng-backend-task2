@@ -31,6 +31,14 @@ export class UserService {
     return await this.usersRepository.findOneBy({ userId });
   }
 
+  async getUserByEmailWithPassword(email: string): Promise<User | undefined> {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .getOne();
+  }
+
   async getUserByEmail(email: string): Promise<User> {
     return await this.usersRepository.findOneBy({ email });
   }
