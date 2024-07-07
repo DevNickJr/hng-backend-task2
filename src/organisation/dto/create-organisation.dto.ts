@@ -5,13 +5,14 @@ import { IOrganisation } from '../interface';
 export class CreateOrganisationDto implements IOrganisation {
   @IsString()
   @IsOptional()
-  orgId: string;
+  orgId?: string;
 
   @IsString()
   name: string;
 
   @IsString()
-  description: string;
+  @IsOptional()
+  description?: string;
 }
 
 export class ReturnOrganisationDto implements IOrganisation {
@@ -22,7 +23,8 @@ export class ReturnOrganisationDto implements IOrganisation {
   name: string;
 
   @IsString()
-  description: string;
+  @IsOptional()
+  description?: string;
 }
 
 export class GetOrganisationResponse extends GenericResponse {

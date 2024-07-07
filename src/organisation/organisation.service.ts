@@ -14,8 +14,12 @@ export class OrganisationService {
     private organisationRepository: Repository<Organisation>,
   ) {}
 
-  async create(createUserDto: CreateOrganisationDto) {
-    return this.organisationRepository.create(createUserDto);
+  async create(createOrganisationDto: CreateOrganisationDto) {
+    const organisation = this.organisationRepository.create(
+      createOrganisationDto,
+    );
+    await this.organisationRepository.save(organisation);
+    return organisation;
   }
 
   async findAll(): Promise<Organisation[]> {
