@@ -3,28 +3,39 @@ import { CreateAuthDto, CreateUserResponse } from './dto/create-auth.dto';
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcrypt';
-import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { IToken } from './interface';
+import { OrganisationService } from 'src/organisation/organisation.service';
+import { UserOrganisationService } from 'src/shared/shared.service';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UserService,
+    private readonly organisationService: OrganisationService,
+    private readonly userOrganisationService: UserOrganisationService,
     private jwtService: JwtService,
   ) {}
 
   async register(createUserDto: CreateUserDto): Promise<CreateUserResponse> {
     try {
       const { password: userPassword, ...other } = createUserDto;
-      const user = await this.usersService.getUserByEmail(other.email);
-
-      if (user && user.email) {
-        throw new BadRequestException('Email Already in use');
-      }
 
       const password = await this.hashPassword(userPassword);
+
       const newUser = await this.usersService.create({ ...other, password });
+
+      const organisation = await this.organisationService.create({
+        name: `${newUser.firstName + "'s"} Organisation`,
+      });
+
+      // Create the StudentCourse entity instance with references to the saved Student and Course
+      await this.userOrganisationService.create({
+        user: newUser,
+        organisation,
+        isOwner: true,
+      });
 
       const payload = { userId: newUser.userId, email: newUser.email };
 

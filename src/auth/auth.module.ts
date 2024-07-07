@@ -4,6 +4,8 @@ import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './constants';
+import { OrganisationModule } from 'src/organisation/organisation.module';
+import { UserOrganisationModule } from 'src/shared/shared.module';
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { jwtConstants } from './constants';
       signOptions: { expiresIn: '36000s' },
     }),
     UserModule,
+    OrganisationModule,
+    UserOrganisationModule,
   ],
   controllers: [AuthController],
   providers: [AuthService],

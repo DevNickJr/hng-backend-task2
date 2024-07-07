@@ -5,8 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { OrganisationModule } from './organisation/organisation.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-// import { User } from './user/entities/user.entity';
-// import { Organisation } from './organisation/entities/organisation.entity';
+import { UserOrganisationModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -25,6 +24,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     AuthModule,
     UserModule,
     OrganisationModule,
+    UserOrganisationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
