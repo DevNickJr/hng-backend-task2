@@ -11,7 +11,16 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    return this.usersRepository.create(createUserDto);
+    const userExists = await this.getUserByEmail(createUserDto.email);
+
+    if (userExists && userExists.email) {
+      throw new BadRequestException('Email Already in use');
+    }
+
+    const user = this.usersRepository.create(createUserDto);
+    await this.usersRepository.save(user);
+
+    return user;
   }
 
   async findAll(): Promise<User[]> {

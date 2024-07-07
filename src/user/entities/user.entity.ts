@@ -1,12 +1,19 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  JoinTable,
+} from 'typeorm';
 import { IUser } from '../interface';
+import { UserOrganisation } from 'src/shared/entities/shared.entity';
 
 @Entity()
 export class User implements IUser {
   //   @PrimaryGeneratedColumn()
   //   id: number;
 
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   userId: string;
 
   @Column()
@@ -23,6 +30,21 @@ export class User implements IUser {
 
   @Column()
   phone: string;
+
+  @OneToMany(
+    () => UserOrganisation,
+    (userOrganisation) => userOrganisation.user,
+  )
+  @JoinTable({
+    name: 'UserOrganisation',
+    joinColumn: {
+      name: 'userId',
+    },
+    inverseJoinColumn: {
+      name: 'orgId',
+    },
+  })
+  userOrganisations: UserOrganisation[];
 }
 
 // "userId": "string" // must be unique
