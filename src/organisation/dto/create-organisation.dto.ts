@@ -15,6 +15,11 @@ export class CreateOrganisationDto implements IOrganisation {
   description?: string;
 }
 
+export class AddUserToOrganisationDto {
+  @IsString()
+  userId: string;
+}
+
 export class ReturnOrganisationDto implements IOrganisation {
   @IsString()
   orgId: string;
@@ -32,5 +37,7 @@ export class GetOrganisationResponse extends GenericResponse {
 }
 
 export class GetOrganisationsResponse extends GenericResponse {
-  data: ReturnOrganisationDto[];
+  data: {
+    organisations: ReturnOrganisationDto[];
+  };
 }

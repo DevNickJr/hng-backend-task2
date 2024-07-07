@@ -10,10 +10,10 @@ export class CreateUserOrganisationDto implements IUserOrganisation {
   orgId?: string;
 
   @IsOptional()
-  user: User;
+  user?: User;
 
   @IsOptional()
-  organisation: Organisation;
+  organisation?: Organisation;
 
   @IsString()
   userId?: string;

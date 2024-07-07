@@ -6,6 +6,7 @@ import {
   CreateUserOrganisationDto,
   GetUserOrganisationResponse,
 } from './dto/create-shared.dto';
+import { ReturnOrganisationDto } from 'src/organisation/dto/create-organisation.dto';
 
 @Injectable()
 export class UserOrganisationService {
@@ -19,6 +20,23 @@ export class UserOrganisationService {
       this.userOrganisationRepository.create(createUserDto);
     await this.userOrganisationRepository.save(userOrganisation);
     return userOrganisation;
+  }
+
+  async findOrganisationsByUserId(
+    userId: string,
+  ): Promise<ReturnOrganisationDto[]> {
+    const value = await this.userOrganisationRepository
+      .createQueryBuilder('userOrganisation')
+      .innerJoinAndSelect('userOrganisation.organisation', 'organisation')
+      .where('userOrganisation.userId = :userId', { userId })
+      // .select('userOrganisation.organisations')
+      .getMany()
+      .then((userOrganisations) =>
+        userOrganisations.map((uo) => uo.organisation),
+      );
+    console.log({ value });
+
+    return value;
   }
 
   async findAll(): Promise<UserOrganisation[]> {

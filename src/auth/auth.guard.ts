@@ -35,7 +35,11 @@ export class AuthGuard implements CanActivate {
 
       request['user'] = user;
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException({
+        status: 'Unathautenticated',
+        message: 'Authentication failed',
+        statusCode: 401,
+      });
     }
     return true;
   }

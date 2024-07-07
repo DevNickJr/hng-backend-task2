@@ -31,6 +31,13 @@ export class UserService {
     return await this.usersRepository.findOneBy({ userId });
   }
 
+  async getUserOrganisations(userId: string): Promise<User> {
+    return await this.usersRepository.findOne({
+      where: { userId },
+      relations: ['userOrganisations', 'userOrganisations.organisation'],
+    });
+  }
+
   async getUserByEmailWithPassword(email: string): Promise<User | undefined> {
     return this.usersRepository
       .createQueryBuilder('user')
@@ -53,7 +60,7 @@ export class UserService {
 
       return {
         status: 'success',
-        message: 'Login successful',
+        message: 'User Found',
         data: user,
       };
     } catch (error) {

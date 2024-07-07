@@ -1,19 +1,37 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { OrganisationService } from './organisation.service';
-import { CreateOrganisationDto } from './dto/create-organisation.dto';
+import {
+  AddUserToOrganisationDto,
+  CreateOrganisationDto,
+} from './dto/create-organisation.dto';
+import { CurrentUser } from 'src/auth/current-user.decorator';
+import { User } from 'src/user/entities/user.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller('api/organisations')
 export class OrganisationController {
   constructor(private readonly organisationService: OrganisationService) {}
 
   @Post()
-  create(@Body() createOrganisationDto: CreateOrganisationDto) {
-    return this.organisationService.create(createOrganisationDto);
+  create(
+    @Body() createOrganisationDto: CreateOrganisationDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.organisationService.userCreate(createOrganisationDto, user);
   }
 
   @Get()
-  findAll() {
-    return this.organisationService.findAll();
+  findAllUserOrganisations(@CurrentUser() user: User) {
+    return this.organisationService.findAllUserOrganisations(user);
   }
 
   @Get(':orgId')
@@ -21,6 +39,21 @@ export class OrganisationController {
     return this.organisationService.findOne(orgId);
   }
 
+  @Post(':orgId/users')
+  addToOrg(
+    @Param('orgId') orgId: string,
+    @Body() addUserToOrganisationDto: AddUserToOrganisationDto,
+  ) {
+    return this.organisationService.addUserToOrg(
+      orgId,
+      addUserToOrganisationDto,
+    );
+  }
+
+  @Get('all')
+  findAll() {
+    return this.organisationService.findAll();
+  }
   // @Patch(':id')
   // update(
   //   @Param('id') id: string,
