@@ -1,6 +1,6 @@
 module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
-  rootDir: 'src',
+  rootDir: './',
   testRegex: '.*\\.spec\\.ts$',
   transform: {
     '^.+\\.ts$': 'ts-jest',
@@ -9,7 +9,7 @@ module.exports = {
   coverageDirectory: '../coverage',
   testEnvironment: 'node',
   moduleNameMapper: {
-    '^src/(.*)$': '<rootDir>/$1',
+    '^src/(.*)$': '<rootDir>/src/$1',
   },
 };
 

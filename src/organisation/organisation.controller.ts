@@ -16,11 +16,11 @@ import { CurrentUser } from 'src/auth/current-user.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { AuthGuard } from 'src/auth/auth.guard';
 
-@UseGuards(AuthGuard)
 @Controller('api/organisations')
 export class OrganisationController {
   constructor(private readonly organisationService: OrganisationService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
   create(
     @Body() createOrganisationDto: CreateOrganisationDto,
@@ -29,11 +29,13 @@ export class OrganisationController {
     return this.organisationService.userCreate(createOrganisationDto, user);
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   findAllUserOrganisations(@CurrentUser() user: User) {
     return this.organisationService.findAllUserOrganisations(user);
   }
 
+  @UseGuards(AuthGuard)
   @Get(':orgId')
   findOne(@Param('orgId') orgId: string) {
     return this.organisationService.findOne(orgId);

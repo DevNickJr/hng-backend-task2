@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { GenericResponse } from 'src/auth/dto/create-auth.dto';
 import { IOrganisation } from '../interface';
 
@@ -8,6 +8,7 @@ export class CreateOrganisationDto implements IOrganisation {
   orgId?: string;
 
   @IsString()
+  @IsNotEmpty()
   name: string;
 
   @IsString()

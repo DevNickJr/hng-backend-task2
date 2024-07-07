@@ -1,18 +1,22 @@
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { IUser } from '../interface';
 import { GenericResponse } from 'src/auth/dto/create-auth.dto';
 
 export class CreateUserDto implements IUser {
   @IsString()
+  @IsNotEmpty()
   firstName: string;
 
   @IsString()
+  @IsNotEmpty()
   lastName: string;
 
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @IsString()
+  @IsNotEmpty()
   password: string;
 
   @IsString()
