@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from './constants';
+// import { jwtConstants } from './constants';
 import { OrganisationModule } from 'src/organisation/organisation.module';
 import { UserOrganisationModule } from 'src/shared/shared.module';
 
@@ -11,8 +11,8 @@ import { UserOrganisationModule } from 'src/shared/shared.module';
   imports: [
     JwtModule.register({
       global: true,
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: '36000s' },
+      // secret: jwtConstants.secret,
+      // signOptions: { expiresIn: '36000s' },
     }),
     UserModule,
     OrganisationModule,

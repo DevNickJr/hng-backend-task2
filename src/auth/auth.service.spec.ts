@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import { UserOrganisationService } from 'src/shared/shared.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { jwtConstants } from './constants';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -122,7 +123,10 @@ describe('AuthService', () => {
           userId: newUser.userId,
           email: newUser.email,
         },
-        expect.any(Object),
+        {
+          expiresIn: jwtConstants.expiresIn,
+          secret: jwtConstants.secret,
+        },
       );
 
       expect(options.expiresIn).toBe('36000s');

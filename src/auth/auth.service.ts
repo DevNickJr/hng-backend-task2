@@ -2,12 +2,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateAuthDto, CreateUserResponse } from './dto/create-auth.dto';
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcrypt';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { IToken } from './interface';
 import { OrganisationService } from 'src/organisation/organisation.service';
 import { UserOrganisationService } from 'src/shared/shared.service';
 import { UserService } from 'src/user/user.service';
+import * as bcrypt from 'bcrypt';
+import { jwtConstants } from './constants';
 
 @Injectable()
 export class AuthService {
@@ -50,6 +51,7 @@ export class AuthService {
         },
       };
     } catch (error) {
+      console.log({ error });
       throw new BadRequestException({
         status: 'Bad request',
         message: 'Registration unsuccessful',
@@ -96,7 +98,10 @@ export class AuthService {
   }
 
   createToken(payload: IToken): string {
-    const token = this.jwtService.sign(payload);
+    const token = this.jwtService.sign(payload, {
+      expiresIn: jwtConstants.expiresIn,
+      secret: jwtConstants.secret,
+    });
     return token;
   }
 }
