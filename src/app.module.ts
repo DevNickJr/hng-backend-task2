@@ -16,6 +16,14 @@ const PGPORT = process.env.PGPORT;
 const PGUSER = process.env.PGUSER;
 const POSTGRES_DB = process.env.POSTGRES_DB;
 
+console.log({
+  PGHOST,
+  PGPASSWORD,
+  PGPORT,
+  PGUSER,
+  POSTGRES_DB,
+});
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
