@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { getManager, getRepository } from 'typeorm';
+import { getRepository } from 'typeorm';
 import { User } from '../src/user/entities/user.entity';
 import { Organisation } from '../src/organisation/entities/organisation.entity';
 
