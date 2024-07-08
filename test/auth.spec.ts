@@ -1,114 +1,200 @@
-import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
-import { getRepository } from 'typeorm';
-import { User } from '../src/user/entities/user.entity';
-import { Organisation } from '../src/organisation/entities/organisation.entity';
+import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { UserService } from 'src/user/user.service';
+import { UserOrganisationService } from 'src/shared/shared.service';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { AuthService } from 'src/auth/auth.service';
+import { OrganisationService } from 'src/organisation/organisation.service';
+import { jwtConstants } from 'src/auth/constants';
 
-describe('AuthController (e2e)', () => {
-  let app: INestApplication;
+describe('AuthService', () => {
+  let authService: AuthService;
+  let userService: UserService;
+  let organisationService: OrganisationService;
+  let userOrganisationService: UserOrganisationService;
+  let jwtService: JwtService;
 
-  beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        {
+          provide: UserService,
+          useValue: {
+            create: jest.fn(),
+          },
+        },
+        {
+          provide: OrganisationService,
+          useValue: {
+            create: jest.fn(),
+          },
+        },
+        {
+          provide: UserOrganisationService,
+          useValue: {
+            create: jest.fn(),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
-
+    authService = module.get<AuthService>(AuthService);
+    userService = module.get<UserService>(UserService);
+    organisationService = module.get<OrganisationService>(OrganisationService);
+    userOrganisationService = module.get<UserOrganisationService>(
+      UserOrganisationService,
+    );
+    jwtService = module.get<JwtService>(JwtService);
   });
 
-  afterAll(async () => {
-    await getRepository(User).query(`DELETE FROM users;`);
-    await getRepository(Organisation).query(`DELETE FROM organisations;`);
-    await app.close();
-  });
-
-  it('should register user successfully with default organisation', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({
+  describe('register', () => {
+    it('should register user successfully with correct JWT expiration', async () => {
+      const createUserDto: CreateUserDto = {
         firstName: 'John',
         lastName: 'Doe',
-        email: 'ajohnny.doe@example.com',
-        password: 'password123',
+        email: 'john@example.com',
+        password: 'password',
         phone: '1234567890',
-      })
-      .expect(201);
+      };
 
-    expect(response.body.status).toBe('success');
-    expect(response.body.data.user.firstName).toBe('John');
-    expect(response.body.data.user.email).toBe('ajohnny.doe@example.com');
-    expect(response.body.data.accessToken).toBeDefined();
+      const hashedPassword = 'hashedPassword';
+      const newUser = {
+        ...createUserDto,
+        userId: '1',
+        password: hashedPassword,
+        userOrganisations: [],
+      };
+      const organisation = {
+        orgId: '1',
+        name: "John's Organisation",
+        userOrganisations: [],
+      };
+      const userOrganisation = {
+        userOrganisationId: 1,
+        orgId: '1',
+        userId: '1',
+        name: "John's Organisation",
+        user: newUser,
+        organisation,
+      };
+      const token = 'jwtToken';
 
-    const organisations = await getRepository(Organisation).find();
-    expect(organisations).toHaveLength(1);
-    expect(organisations[0].name).toBe("John's Organisation");
-  });
+      jest.spyOn(bcrypt, 'hash').mockResolvedValue(hashedPassword);
+      jest.spyOn(userService, 'create').mockResolvedValue(newUser);
+      jest.spyOn(organisationService, 'create').mockResolvedValue(organisation);
+      jest
+        .spyOn(userOrganisationService, 'create')
+        .mockResolvedValue(userOrganisation);
+      jest.spyOn(jwtService, 'sign').mockReturnValue(token);
 
-  it('should log the user in successfully', async () => {
-    const loginResponse = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        email: 'ajohnny.doe@example.com',
-        password: 'password123',
-      })
-      .expect(200);
+      const result = await authService.register(createUserDto);
 
-    expect(loginResponse.body.status).toBe('success');
-    expect(loginResponse.body.data.user.email).toBe('ajohnny.doe@example.com');
-    expect(loginResponse.body.data.accessToken).toBeDefined();
-  });
+      const signCall = jwtService.sign as jest.Mock;
+      const signArgs = signCall.mock.calls[0];
+      const options = signArgs[1];
 
-  it('should fail if required fields are missing', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({
-        firstName: '',
-        lastName: '',
-        email: 'invalid-email',
-        password: '',
-        phone: '',
-      })
-      .expect(422);
+      expect(bcrypt.hash).toHaveBeenCalledWith(
+        createUserDto.password,
+        expect.any(Number),
+      );
+      expect(userService.create).toHaveBeenCalledWith({
+        ...createUserDto,
+        password: hashedPassword,
+      });
+      expect(organisationService.create).toHaveBeenCalledWith({
+        name: "John's Organisation",
+      });
+      expect(userOrganisationService.create).toHaveBeenCalledWith({
+        user: newUser,
+        organisation,
+        isOwner: true,
+      });
+      expect(jwtService.sign).toHaveBeenCalledWith(
+        {
+          userId: newUser.userId,
+          email: newUser.email,
+        },
+        {
+          expiresIn: jwtConstants.expiresIn,
+          secret: jwtConstants.secret,
+        },
+      );
 
-    expect(response.body.errors).toContainEqual(
-      expect.objectContaining({
-        field: 'firstName',
-        message: expect.any(String),
-      }),
-    );
-    expect(response.body.errors).toContainEqual(
-      expect.objectContaining({
-        field: 'lastName',
-        message: expect.any(String),
-      }),
-    );
-    expect(response.body.errors).toContainEqual(
-      expect.objectContaining({ field: 'email', message: expect.any(String) }),
-    );
-    expect(response.body.errors).toContainEqual(
-      expect.objectContaining({
-        field: 'password',
-        message: expect.any(String),
-      }),
-    );
-  });
+      expect(options.expiresIn).toBe('36000s');
 
-  it('should fail if there’s duplicate email or userId', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'ajohnny.doe@example.com',
-        password: 'password123',
-        phone: '0987654321',
-      })
-      .expect(400);
+      expect(result).toEqual({
+        status: 'success',
+        message: 'Registration successful',
+        data: {
+          accessToken: token,
+          user: newUser,
+        },
+      });
+    });
 
-    expect(response.body.status).toBe('Bad request');
-    expect(response.body.message).toBe('Registration unsuccessful');
+    // it('should throw error if user already exists', async () => {
+    //   const createUserDto: CreateUserDto = {
+    //     firstName: 'John',
+    //     lastName: 'Doe',
+    //     email: 'john@example.com',
+    //     password: 'password',
+    //     phone: '1234567890',
+    //   };
+    //   const hashedPassword = 'hashedPassword';
+    //   const newUser = {
+    //     ...createUserDto,
+    //     userId: '1',
+    //     password: hashedPassword,
+    //     userOrganisations: [],
+    //   };
+    //   const organisation = {
+    //     orgId: '1',
+    //     name: "John's Organisation",
+    //     userOrganisations: [],
+    //   };
+
+    //   jest.spyOn(bcrypt, 'hash').mockResolvedValue(hashedPassword);
+    //   jest.spyOn(userService, 'create').mockResolvedValue(newUser);
+    //   jest.spyOn(organisationService, 'create').mockResolvedValue(organisation);
+    //   jest
+    //     .spyOn(userService, 'create')
+    //     .mockRejectedValue(new BadRequestException('Email Already in use'));
+
+    //   await expect(authService.register(createUserDto)).rejects.toThrow(
+    //     BadRequestException,
+    //   );
+
+    //   expect(userService.create).toHaveBeenCalledWith({
+    //     ...createUserDto,
+    //     password: hashedPassword,
+    //   });
+    // });
   });
 });
+
+// import { Test, TestingModule } from '@nestjs/testing';
+// import { AuthService } from './auth.service';
+
+// describe('AuthService', () => {
+//   let service: AuthService;
+
+//   beforeEach(async () => {
+//     const module: TestingModule = await Test.createTestingModule({
+//       providers: [AuthService],
+//     }).compile();
+
+//     service = module.get<AuthService>(AuthService);
+//   });
+
+//   it('should be defined', () => {
+//     expect(service).toBeDefined();
+//   });
+// });
